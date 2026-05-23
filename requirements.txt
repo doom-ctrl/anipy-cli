@@ -1,0 +1,3 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+anipy-api @ git+https://github.com/sdaqo/anipy-cli.git#subdirectory=api
