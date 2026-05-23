@@ -194,6 +194,8 @@ async def get_video(
             lang=lang_enum,
             preferred_quality=quality,
         )
+        if video is None:
+            raise HTTPException(status_code=404, detail="Video not available for this episode")
         return {
             "url": video.url,
             "resolution": video.resolution,
@@ -219,6 +221,8 @@ async def get_all_videos(
         anime_name = name or identifier
         anime = Anime(prov, name=anime_name, identifier=identifier, languages=set())
         videos = anime.get_videos(episode=episode, lang=lang_enum)
+        if not videos:
+            return {"videos": []}
         return {
             "videos": [
                 {
