@@ -134,11 +134,16 @@ async def search_anime(
 async def get_anime_info(
     provider: ProviderEnum,
     identifier: str,
+    name: Optional[str] = Query(None, description="Anime name (required)"),
 ):
     """Get anime information."""
     try:
         prov = get_cached_provider(provider)
-        anime = Anime(prov, identifier=identifier, languages=set())
+        # First search to get name if not provided
+        if not name:
+            # Try to find by identifier - search for empty and filter
+            name = identifier  # fallback
+        anime = Anime(prov, name=name, identifier=identifier, languages=set())
         info = anime.get_info()
         return {
             "name": info.name,
@@ -154,13 +159,15 @@ async def get_anime_info(
 async def get_episodes(
     provider: ProviderEnum,
     identifier: str,
+    name: Optional[str] = Query(None, description="Anime name (required)"),
     lang: LanguageEnum = Query(LanguageEnum.sub, description="Language type"),
 ):
     """Get anime episodes."""
     try:
         prov = get_cached_provider(provider)
         lang_enum = LanguageTypeEnum.SUB if lang == LanguageEnum.sub else LanguageTypeEnum.DUB
-        anime = Anime(prov, identifier=identifier, languages=set())
+        anime_name = name or identifier
+        anime = Anime(prov, name=anime_name, identifier=identifier, languages=set())
         episodes = anime.get_episodes(lang=lang_enum)
         return {"episodes": episodes}
     except Exception as e:
@@ -172,6 +179,7 @@ async def get_video(
     provider: ProviderEnum,
     identifier: str,
     episode: float = Query(..., description="Episode number"),
+    name: Optional[str] = Query(None, description="Anime name (required)"),
     lang: LanguageEnum = Query(LanguageEnum.sub, description="Language type"),
     quality: int = Query(720, description="Preferred quality (480, 720, 1080)"),
 ):
@@ -179,7 +187,8 @@ async def get_video(
     try:
         prov = get_cached_provider(provider)
         lang_enum = LanguageTypeEnum.SUB if lang == LanguageEnum.sub else LanguageTypeEnum.DUB
-        anime = Anime(prov, identifier=identifier, languages=set())
+        anime_name = name or identifier
+        anime = Anime(prov, name=anime_name, identifier=identifier, languages=set())
         video = anime.get_video(
             episode=episode,
             lang=lang_enum,
@@ -200,13 +209,15 @@ async def get_all_videos(
     provider: ProviderEnum,
     identifier: str,
     episode: float = Query(..., description="Episode number"),
+    name: Optional[str] = Query(None, description="Anime name (required)"),
     lang: LanguageEnum = Query(LanguageEnum.sub, description="Language type"),
 ):
     """Get all video streams for an episode."""
     try:
         prov = get_cached_provider(provider)
         lang_enum = LanguageTypeEnum.SUB if lang == LanguageEnum.sub else LanguageTypeEnum.DUB
-        anime = Anime(prov, identifier=identifier, languages=set())
+        anime_name = name or identifier
+        anime = Anime(prov, name=anime_name, identifier=identifier, languages=set())
         videos = anime.get_videos(episode=episode, lang=lang_enum)
         return {
             "videos": [
