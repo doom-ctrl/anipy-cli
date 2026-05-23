@@ -27,6 +27,18 @@ from anipy_api.provider import (
 from anipy_api.anime import Anime
 
 
+# Proxy configuration
+PROXY_URL = os.environ.get("PROXY_URL", "")  # e.g., "http://user:pass@host:port"
+
+# Set proxy environment variables for requests
+if PROXY_URL:
+    os.environ["HTTP_PROXY"] = PROXY_URL
+    os.environ["HTTPS_PROXY"] = PROXY_URL
+    print(f"🔄 Using proxy: {PROXY_URL}")
+else:
+    print("⚠️  No proxy configured - providers may be blocked")
+
+
 # Provider enum for type safety
 class ProviderEnum(str, Enum):
     animekai = "animekai"
@@ -235,8 +247,7 @@ async def get_all_videos(
             ]
         }
     except Exception as e:
-        import traceback
-        return {"error": str(e), "trace": traceback.format_exc()}, 500
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============ Main ============
