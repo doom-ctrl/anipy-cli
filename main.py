@@ -221,8 +221,8 @@ async def get_all_videos(
         anime_name = name or identifier
         anime = Anime(prov, name=anime_name, identifier=identifier, languages=set())
         videos = anime.get_videos(episode=episode, lang=lang_enum)
-        if not videos:
-            return {"videos": []}
+        if videos is None:
+            videos = []
         return {
             "videos": [
                 {
@@ -235,7 +235,8 @@ async def get_all_videos(
             ]
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        return {"error": str(e), "trace": traceback.format_exc()}, 500
 
 
 # ============ Main ============
